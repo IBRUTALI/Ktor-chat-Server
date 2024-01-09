@@ -4,8 +4,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Group(
+    val id: String,
     val name: String,
-    val subscribers: Long,
-    val isSubscriber: Boolean,
-    val messageStory: List<Message>
+    val subscribers: List<Message>,
+    val owner: String,
+    val createdAt: Long
 )

@@ -1,5 +1,6 @@
-package com.ighorosipov.data
+package com.ighorosipov.data.datasource.postgresdatasource
 
+import com.ighorosipov.data.datasource.UserDataSource
 import com.ighorosipov.data.model.User
 import com.ighorosipov.data.model.table.UserTable
 import kotlinx.coroutines.Dispatchers

@@ -9,9 +9,9 @@ import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 
 fun Application.configureRouting() {
-//    val roomController by inject<RoomController>()
+    val roomController by inject<RoomController>()
     install(Routing) {
-//        chatSocket(roomController)
-//        getAllMessages(roomController)
+        chatSocket(roomController)
+        getAllMessages(roomController)
     }
 }

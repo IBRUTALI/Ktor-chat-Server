@@ -1,7 +1,7 @@
 package com.ighorosipov.di
 
-import com.ighorosipov.data.PostgresUserDataSource
-import com.ighorosipov.data.UserDataSource
+import com.ighorosipov.data.datasource.postgresdatasource.PostgresUserDataSource
+import com.ighorosipov.data.datasource.UserDataSource
 import com.ighorosipov.room.RoomController
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -18,25 +18,25 @@ val mainModule = module {
 //        MessageDataSourceImpl(get())
 //    }
 
-//    single {
-//        Database.connect(HikariDataSource(
-//            HikariConfig().apply {
-//                driverClassName = System.getenv("JDBC_DRIVER")
-//                jdbcUrl = System.getenv("JDBC_DATABASE_URL")
-//                maximumPoolSize = 100
-//                isAutoCommit = false
-//                transactionIsolation = "TRANSACTION_REPEATABLE_READ"
-//                validate()
-//            }
-//        )
-//        )
-//    }
+    single {
+        Database.connect(HikariDataSource(
+            HikariConfig().apply {
+                driverClassName = System.getenv("JDBC_DRIVER")
+                jdbcUrl = System.getenv("JDBC_DATABASE_URL")
+                maximumPoolSize = 100
+                isAutoCommit = false
+                transactionIsolation = "TRANSACTION_REPEATABLE_READ"
+                validate()
+            }
+        )
+        )
+    }
 
-//    single<UserDataSource> {
-//        PostgresUserDataSource(get())
-//    }
+    single<UserDataSource> {
+        PostgresUserDataSource(get())
+    }
 
-//    single {
-//        RoomController(get())
-//    }
+    single {
+        RoomController(get())
+    }
 }

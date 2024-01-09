@@ -1,6 +1,6 @@
 package com.ighorosipov.room
 
-import com.ighorosipov.data.MessageDataSource
+import com.ighorosipov.data.datasource.MessageDataSource
 import com.ighorosipov.data.model.Message
 import io.ktor.websocket.*
 import kotlinx.serialization.encodeToString
@@ -21,7 +21,7 @@ class RoomController(
             throw MemberAlreadyExistsException()
         }
         members[username] = Member(
-            username = username,
+            userlogin = username,
             sessionId = sessionId,
             socket = socket
         )
@@ -31,7 +31,7 @@ class RoomController(
         members.values.forEach { member ->  
             val messageEntity = Message(
                 text = message,
-                username = senderUsername,
+                userlogin = senderUsername,
                 timestamp = System.currentTimeMillis()
             )
             messageDataSource.insertMessage(messageEntity)

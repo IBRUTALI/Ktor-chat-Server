@@ -1,10 +1,10 @@
-package com.ighorosipov.data
+package com.ighorosipov.data.datasource
 
 import com.ighorosipov.data.model.Message
 
 interface MessageDataSource {
 
-    suspend fun getAllMessages(): List<Message>
+    suspend fun getAllMessages(groupId: String): List<Message>
 
     suspend fun insertMessage(message: Message)
 

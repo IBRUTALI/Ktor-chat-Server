@@ -1,4 +1,4 @@
-package com.ighorosipov.data
+package com.ighorosipov.data.datasource
 
 import com.ighorosipov.data.model.User
 
