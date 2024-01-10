@@ -1,6 +1,7 @@
 package com.ighorosipov.session
 
 data class ChatSession(
-    val username: String,
+    val userlogin: String,
+    val groupId: String,
     val sessionId: String
 )

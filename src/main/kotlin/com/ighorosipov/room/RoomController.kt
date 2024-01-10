@@ -5,6 +5,7 @@ import com.ighorosipov.data.model.Message
 import io.ktor.websocket.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class RoomController(
@@ -13,25 +14,27 @@ class RoomController(
     private val members = ConcurrentHashMap<String, Member>()
 
     fun onJoin(
-        username: String,
+        userlogin: String,
         sessionId: String,
         socket: WebSocketSession
     ) {
-        if(members.containsKey(username)) {
+        if(members.containsKey(userlogin)) {
             throw MemberAlreadyExistsException()
         }
-        members[username] = Member(
-            userlogin = username,
+        members[userlogin] = Member(
+            userlogin = userlogin,
             sessionId = sessionId,
             socket = socket
         )
     }
 
-   suspend fun sendMessage(senderUsername: String, message: String) {
+   suspend fun sendMessage(senderLogin: String, message: String, groupId: String) {
         members.values.forEach { member ->  
             val messageEntity = Message(
+                id = UUID.randomUUID().toString(),
+                groupId = groupId,
                 text = message,
-                userlogin = senderUsername,
+                userlogin = senderLogin,
                 timestamp = System.currentTimeMillis()
             )
             messageDataSource.insertMessage(messageEntity)
@@ -41,14 +44,14 @@ class RoomController(
         }
     }
 
-    suspend fun getAllMessages(): List<Message> {
-        return messageDataSource.getAllMessages()
+    suspend fun getAllMessages(groupId: String): List<Message> {
+        return messageDataSource.getAllMessages(groupId)
     }
 
-    suspend fun tryDisconnect(username: String) {
-        members[username]?.socket?.close()
-        if (members.containsKey(username)) {
-            members.remove(username)
+    suspend fun tryDisconnect(userlogin: String) {
+        members[userlogin]?.socket?.close()
+        if (members.containsKey(userlogin)) {
+            members.remove(userlogin)
         }
     }
 

@@ -6,19 +6,21 @@ import com.ighorosipov.data.model.table.GroupTable.uuid
 import com.ighorosipov.data.model.table.MessageTable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.util.*
 
-class PostgresMessageDataSource(
-    private val messageTable: MessageTable
-) : MessageDataSource {
+class PostgresMessageDataSource : MessageDataSource {
+
+    private val messageTable = MessageTable
 
     override suspend fun getAllMessages(groupId: String): List<Message> {
         return withContext(Dispatchers.IO) {
             transaction {
-                messageTable.select { MessageTable.groupId.eq(uuid(groupId)) }
+                messageTable.selectAll()
+                    .where { MessageTable.groupId.eq(uuid(groupId)) }
                     .mapNotNull {
                         rowToMessage(it)
                     }
@@ -63,6 +65,5 @@ class PostgresMessageDataSource(
             )
         }
     }
-
 
 }

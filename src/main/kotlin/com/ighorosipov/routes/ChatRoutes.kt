@@ -21,14 +21,15 @@ fun Route.chatSocket(roomController: RoomController) {
         }
             try {
                 roomController.onJoin(
-                    username = session.username,
+                    userlogin = session.userlogin,
                     sessionId = session.sessionId,
                     socket = this
                 )
                 incoming.consumeEach { frame ->
                     if(frame is Frame.Text) {
                         roomController.sendMessage(
-                            senderUsername = session.username,
+                            senderLogin = session.userlogin,
+                            groupId = session.groupId,
                             message = frame.readText()
                         )
                     }
@@ -38,16 +39,19 @@ fun Route.chatSocket(roomController: RoomController) {
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
-                roomController.tryDisconnect(session.username)
+                roomController.tryDisconnect(session.userlogin)
             }
     }
 }
 
 fun Route.getAllMessages(roomController: RoomController) {
     get("/messages") {
-        call.respond(
-            HttpStatusCode.OK,
-            roomController.getAllMessages()
-        )
+        val session = call.sessions.get<ChatSession>()
+        if (session != null) {
+            call.respond(
+                HttpStatusCode.OK,
+                roomController.getAllMessages(session.groupId)
+            )
+        }
     }
 }

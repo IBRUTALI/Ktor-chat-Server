@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class Group(
     val id: String,
     val name: String,
-    val subscribers: List<Message>,
+    val subscribers: List<String>,
     val owner: String,
     val createdAt: Long
 )

@@ -5,18 +5,17 @@ import com.ighorosipov.data.model.User
 import com.ighorosipov.data.model.table.UserTable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 
-class PostgresUserDataSource(
-    private val userTable: UserTable
-) : UserDataSource {
+class PostgresUserDataSource : UserDataSource {
+
+    private val userTable = UserTable
 
     override suspend fun getUserByLogin(login: String) = withContext(Dispatchers.IO) {
         transaction {
-            userTable.select { UserTable.userlogin.eq(login) }
+            userTable.selectAll().where { UserTable.userlogin.eq(login) }
                 .map { rowToUser(it) }
                 .singleOrNull()
         }
