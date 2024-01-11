@@ -36,9 +36,9 @@ val mainModule = module {
 //        )
 //    }
 
-//    single<MessageDataSource> {
-//        PostgresMessageDataSource(get())
-//    }
+    single<MessageDataSource> {
+        PostgresMessageDataSource()
+    }
 //
 //    single<UserDataSource> {
 //        PostgresUserDataSource(get())

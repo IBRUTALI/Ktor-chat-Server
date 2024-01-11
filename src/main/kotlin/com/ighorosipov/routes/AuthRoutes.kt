@@ -26,7 +26,7 @@ fun Route.signUp(
             call.respond(HttpStatusCode.BadRequest)
             return@post
         }
-        val areFieldsBlank = request.userlogin.isBlank() || request.password.isBlank()
+        val areFieldsBlank = request.userlogin.isBlank() || request.password.isBlank() || request.username.isBlank()
         val isPasswordTooShort = request.password.length < 8
         if(areFieldsBlank || isPasswordTooShort) {
             call.respond(HttpStatusCode.Conflict)
