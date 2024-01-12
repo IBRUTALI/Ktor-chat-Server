@@ -4,7 +4,7 @@ import com.ighorosipov.data.model.Message
 
 interface MessageDataSource {
 
-    suspend fun getAllMessages(groupId: String): List<Message>
+    suspend fun getAllMessagesForGroup(groupId: String): List<Message>
 
     suspend fun insertMessage(message: Message)
 

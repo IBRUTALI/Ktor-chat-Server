@@ -1,5 +1,6 @@
 package com.ighorosipov.room
 
+import com.ighorosipov.data.datasource.GroupDataSource
 import com.ighorosipov.data.datasource.MessageDataSource
 import com.ighorosipov.data.model.Message
 import io.ktor.websocket.*
@@ -8,8 +9,9 @@ import kotlinx.serialization.json.Json
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-class RoomController(
-    private val messageDataSource: MessageDataSource
+class GroupsController(
+    private val messageDataSource: MessageDataSource,
+    private val groupDataSource: GroupDataSource
 ) {
     private val members = ConcurrentHashMap<String, Member>()
 
@@ -18,9 +20,6 @@ class RoomController(
         sessionId: String,
         socket: WebSocketSession
     ) {
-//        if(members.containsKey(userlogin)) {
-//            throw MemberAlreadyExistsException()
-//        }
         members[userlogin] = Member(
             userlogin = userlogin,
             sessionId = sessionId,
@@ -28,8 +27,8 @@ class RoomController(
         )
     }
 
-   suspend fun sendMessage(senderLogin: String, message: String, groupId: String) {
-        members.values.forEach { member ->  
+    suspend fun sendMessage(senderLogin: String, message: String, groupId: String) {
+        members.values.forEach { member ->
             val messageEntity = Message(
                 id = UUID.randomUUID().toString(),
                 groupId = groupId,
@@ -44,8 +43,12 @@ class RoomController(
         }
     }
 
-    suspend fun getAllMessages(groupId: String): List<Message> {
+    suspend fun getAllMessagesForGroup(groupId: String): List<Message> {
         return messageDataSource.getAllMessagesForGroup(groupId)
+    }
+
+    suspend fun getAllMessagesFromGroups(userlogin: String): List<Message> {
+        return messageDataSource.getAllMessagesForGroup(userlogin)
     }
 
     suspend fun tryDisconnect(userlogin: String) {

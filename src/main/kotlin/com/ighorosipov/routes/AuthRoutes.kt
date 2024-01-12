@@ -21,7 +21,7 @@ fun Route.signUp(
     hashingService: HashingService,
     userDataSource: UserDataSource
 ) {
-    post("signup") {
+    post("sign-up") {
         val request = call.receiveOrNull<AuthRequest>() ?: kotlin.run {
             call.respond(HttpStatusCode.BadRequest)
             return@post
@@ -56,7 +56,7 @@ fun Route.signIn(
     tokenService: TokenService,
     tokenConfig: TokenConfig
 ) {
-    post("signin") {
+    post("sign-in") {
         val request = call.receiveOrNull<AuthRequest>() ?: kotlin.run {
             call.respond(HttpStatusCode.BadRequest)
             return@post

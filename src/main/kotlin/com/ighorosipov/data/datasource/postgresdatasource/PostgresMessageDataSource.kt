@@ -1,22 +1,24 @@
 package com.ighorosipov.data.datasource.postgresdatasource
 
 import com.ighorosipov.data.datasource.MessageDataSource
+import com.ighorosipov.data.model.Group
+import com.ighorosipov.data.model.GroupWithMessages
 import com.ighorosipov.data.model.Message
+import com.ighorosipov.data.model.table.GroupTable
 import com.ighorosipov.data.model.table.GroupTable.uuid
 import com.ighorosipov.data.model.table.MessageTable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.util.*
 
 class PostgresMessageDataSource : MessageDataSource {
 
     private val messageTable = MessageTable
 
-    override suspend fun getAllMessages(groupId: String): List<Message> {
+    override suspend fun getAllMessagesForGroup(groupId: String): List<Message> {
         return withContext(Dispatchers.IO) {
             transaction {
                 messageTable.selectAll()

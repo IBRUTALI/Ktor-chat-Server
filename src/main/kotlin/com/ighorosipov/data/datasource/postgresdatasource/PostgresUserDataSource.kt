@@ -24,6 +24,9 @@ class PostgresUserDataSource : UserDataSource {
     override suspend fun insertNewUser(user: User): Boolean {
         withContext(Dispatchers.IO) {
             transaction {
+                if (userTable.selectAll().where { UserTable.userlogin.eq(user.userlogin) }.count() == 1L ) {
+                    return@transaction false
+                }
                 userTable.insert { table ->
                     table[userlogin] = user.userlogin
                     table[username] = user.username

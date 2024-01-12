@@ -1,6 +1,5 @@
 package com.ighorosipov.data.model.table
 
-import com.ighorosipov.data.model.table.GroupTable.entityId
 import org.jetbrains.exposed.sql.Table
 
 object MessageTable: Table() {
