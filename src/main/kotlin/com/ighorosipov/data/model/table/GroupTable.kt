@@ -7,7 +7,6 @@ object GroupTable: Table() {
 
     val id = uuid("group_id").autoGenerate()
     val name = varchar("group_name", 100)
-    val arrayOfSubscribers = varchar("array_of_subscribers", 10485760)
     val owner = reference("userlogin", UserTable.userlogin)
     val createdAt = long("timestamp")
 
