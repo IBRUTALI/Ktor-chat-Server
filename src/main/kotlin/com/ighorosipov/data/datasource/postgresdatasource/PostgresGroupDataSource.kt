@@ -12,6 +12,7 @@ import com.ighorosipov.data.model.table.UserTable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.UUID
 
@@ -64,12 +65,27 @@ class PostgresGroupDataSource : GroupDataSource {
         TODO("Not yet implemented")
     }
 
-    override suspend fun subscribeToGroup() {
-        TODO("Not yet implemented")
+    override suspend fun subscribeToGroup(userlogin: String, groupId: String) {
+        withContext(Dispatchers.IO) {
+            transaction {
+                userSubscriptionsTable.insert { table ->
+                    table[UserSubscriptionsTable.userlogin] = userlogin
+                    table[UserSubscriptionsTable.groupId] = UUID.fromString(groupId)
+                    table[UserSubscriptionsTable.isSubscribed] = true
+
+                }
+            }
+        }
     }
 
-    override suspend fun unsubscribeFromGroup() {
-        TODO("Not yet implemented")
+    override suspend fun unsubscribeFromGroup(userlogin: String, groupId: String) {
+        withContext(Dispatchers.IO) {
+            transaction {
+                userSubscriptionsTable.deleteWhere {
+                    UserSubscriptionsTable.userlogin.eq(userlogin) and UserSubscriptionsTable.groupId.eq(UUID.fromString(groupId))
+                }
+            }
+        }
     }
 
     private fun getSubscribersByGroupId(groupId: UUID): List<User> {

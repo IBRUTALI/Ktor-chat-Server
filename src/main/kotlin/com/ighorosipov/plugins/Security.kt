@@ -11,22 +11,6 @@ import io.ktor.server.sessions.*
 import io.ktor.util.*
 
 fun Application.configureSecurity(config: TokenConfig) {
-    install(Sessions) {
-        cookie<ChatSession>("SESSION")
-    }
-
-    intercept(ApplicationCallPipeline.Features) {
-        if (call.sessions.get<ChatSession>() == null) {
-            val userlogin = call.parameters["login"] ?: "Guest"
-            call.sessions.set(
-                ChatSession(
-                    userlogin = userlogin,
-                    groupId = "",
-                    sessionId = generateNonce()
-                )
-            )
-        }
-    }
 
     authentication {
         jwt {
@@ -43,6 +27,23 @@ fun Application.configureSecurity(config: TokenConfig) {
                     JWTPrincipal(credential.payload)
                 } else null
             }
+        }
+    }
+
+    install(Sessions) {
+        cookie<ChatSession>("SESSION")
+    }
+
+    intercept(ApplicationCallPipeline.Features) {
+        if (call.sessions.get<ChatSession>() == null) {
+            val userlogin = call.parameters["login"] ?: "Guest"
+            call.sessions.set(
+                ChatSession(
+                    userlogin = userlogin,
+                    groupId = "",
+                    sessionId = generateNonce()
+                )
+            )
         }
     }
 }

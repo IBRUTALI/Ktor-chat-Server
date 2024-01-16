@@ -16,8 +16,8 @@ interface GroupDataSource {
 
     suspend fun deleteGroup(group: Group)
 
-    suspend fun subscribeToGroup()
+    suspend fun subscribeToGroup(userlogin: String, groupId: String)
 
-    suspend fun unsubscribeFromGroup()
+    suspend fun unsubscribeFromGroup(userlogin: String, groupId: String)
 
 }

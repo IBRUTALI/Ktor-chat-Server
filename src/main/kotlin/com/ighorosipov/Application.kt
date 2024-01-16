@@ -1,6 +1,8 @@
 package com.ighorosipov
 
 import com.ighorosipov.data.PostgresDbFactory
+import com.ighorosipov.data.datasource.postgresdatasource.PostgresGroupDataSource
+import com.ighorosipov.data.datasource.postgresdatasource.PostgresMessageDataSource
 import com.ighorosipov.data.datasource.postgresdatasource.PostgresUserDataSource
 import com.ighorosipov.data.model.table.UserTable
 import com.ighorosipov.di.mainModule
@@ -21,6 +23,8 @@ fun Application.module() {
     }
     PostgresDbFactory.init()
     val userDataSource = PostgresUserDataSource()
+    val groupDataSource = PostgresGroupDataSource()
+    val messageDataSource = PostgresMessageDataSource()
     val tokenService = JwtTokenService()
     val tokenConfig = TokenConfig(
         issuer = environment.config.property("jwt.issuer").getString(),
@@ -35,7 +39,9 @@ fun Application.module() {
         hashingService = hashingService,
         userDataSource = userDataSource,
         tokenService = tokenService,
-        tokenConfig = tokenConfig
+        tokenConfig = tokenConfig,
+        groupDataSource = groupDataSource,
+        messageDataSource = messageDataSource
     )
     configureMonitoring()
     configureSerialization()
