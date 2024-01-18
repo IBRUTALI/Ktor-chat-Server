@@ -10,7 +10,9 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.sessions.*
 import io.ktor.util.*
 
-fun Application.configureSecurity(config: TokenConfig) {
+fun Application.configureSecurity(
+    config: TokenConfig
+) {
 
     authentication {
         jwt {
@@ -36,7 +38,7 @@ fun Application.configureSecurity(config: TokenConfig) {
 
     intercept(ApplicationCallPipeline.Features) {
         if (call.sessions.get<ChatSession>() == null) {
-            val userlogin = call.parameters["login"] ?: "Guest"
+            val userlogin = call.parameters["userlogin"] ?: "Guest"
             call.sessions.set(
                 ChatSession(
                     userlogin = userlogin,

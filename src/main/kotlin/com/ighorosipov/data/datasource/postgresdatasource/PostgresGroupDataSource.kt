@@ -11,6 +11,7 @@ import com.ighorosipov.data.model.table.UserSubscriptionsTable
 import com.ighorosipov.data.model.table.UserTable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -20,14 +21,13 @@ class PostgresGroupDataSource : GroupDataSource {
 
     private val groupTable = GroupTable
     private val messageTable = MessageTable.alias("u1")
-    private val userSubscriptionsTable = UserSubscriptionsTable.alias("u2")
+    private val userSubscriptionsTable = UserSubscriptionsTable.alias("usersubscriptions")
     private val userTable = UserTable.alias("u3")
 
     override suspend fun createGroup(group: Group) {
         withContext(Dispatchers.IO) {
             transaction {
                 groupTable.insert { table ->
-                    table[id] = uuid(group.id)
                     table[name] = group.name
                     table[owner] = group.owner
                     table[createdAt] = group.createdAt
@@ -68,7 +68,7 @@ class PostgresGroupDataSource : GroupDataSource {
     override suspend fun subscribeToGroup(userlogin: String, groupId: String) {
         withContext(Dispatchers.IO) {
             transaction {
-                userSubscriptionsTable.insert { table ->
+                UserSubscriptionsTable.insert { table ->
                     table[UserSubscriptionsTable.userlogin] = userlogin
                     table[UserSubscriptionsTable.groupId] = UUID.fromString(groupId)
                     table[UserSubscriptionsTable.isSubscribed] = true
@@ -81,14 +81,15 @@ class PostgresGroupDataSource : GroupDataSource {
     override suspend fun unsubscribeFromGroup(userlogin: String, groupId: String) {
         withContext(Dispatchers.IO) {
             transaction {
-                userSubscriptionsTable.deleteWhere {
-                    UserSubscriptionsTable.userlogin.eq(userlogin) and UserSubscriptionsTable.groupId.eq(UUID.fromString(groupId))
-                }
+//                userSubscriptionsTable.deleteWhere {
+//                    UserSubscriptionsTable.userlogin.eq(userlogin) and UserSubscriptionsTable.groupId.eq(UUID.fromString(groupId))
+//                }
+                TODO()
             }
         }
     }
 
-    private fun getSubscribersByGroupId(groupId: UUID): List<User> {
+    private fun getSubscribersByGroupId(groupId: EntityID<UUID>): List<User> {
         return transaction {
             userTable
                 .innerJoin(
@@ -103,7 +104,7 @@ class PostgresGroupDataSource : GroupDataSource {
         }
     }
 
-    private fun getMessagesByGroupId(groupId: UUID): List<Message> {
+    private fun getMessagesByGroupId(groupId: EntityID<UUID>): List<Message> {
         return transaction {
             messageTable
                 .selectAll()
@@ -117,7 +118,6 @@ class PostgresGroupDataSource : GroupDataSource {
     private fun rowToGroup(row: ResultRow?): Group? {
         return row?.let {
             Group(
-                id = row[GroupTable.id].toString(),
                 name = row[GroupTable.name],
                 owner = row[GroupTable.owner],
                 createdAt = row[GroupTable.createdAt]

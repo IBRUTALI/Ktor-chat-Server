@@ -83,7 +83,7 @@ fun Route.signIn(
         val token = tokenService.generate(
             config = tokenConfig,
             TokenClaim(
-                name = "login",
+                name = "userlogin",
                 value = user.userlogin
             )
         )
@@ -109,7 +109,7 @@ fun Route.getSecretInfo() {
     authenticate {
         get("secret") {
             val principal = call.principal<JWTPrincipal>()
-            val userlogin = principal?.getClaim("login", String::class)
+            val userlogin = principal?.getClaim("userlogin", String::class)
             call.respond(HttpStatusCode.OK, "Your login is $userlogin")
         }
     }

@@ -16,21 +16,20 @@ fun Route.createGroup(
     groupDataSource: GroupDataSource
 ) {
     authenticate {
-        post("/groups/create-group") {
+        post("groups/create-group") {
             val request = call.receiveOrNull<GroupRequest>() ?: kotlin.run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
             }
-            val areFieldsBlank = request.name.isBlank() || request.owner.isBlank()
+            val areFieldsBlank = request.name.isBlank()
             if (areFieldsBlank) {
                 call.respond(HttpStatusCode.Conflict)
                 return@post
             }
 
             val group = Group(
-                id = UUID.randomUUID().toString(),
                 name = request.name,
-                owner = call.principal<JWTPrincipal>()?.getClaim("login", String::class)!!,
+                owner = call.principal<JWTPrincipal>()?.getClaim("userlogin", String::class)!!,
                 createdAt = System.currentTimeMillis()
             )
             groupDataSource.createGroup(group)
@@ -41,24 +40,27 @@ fun Route.createGroup(
 
 fun Route.getGroups(groupDataSource: GroupDataSource) {
     authenticate {
-        get("/groups") {
-            call.principal<JWTPrincipal>()?.getClaim("login", String::class)?.let {
-                groupDataSource.getAllGroupsInfo(it)
+        get("groups") {
+            call.principal<JWTPrincipal>()?.getClaim("userlogin", String::class)?.let {
+                val groupsWithMessages = groupDataSource.getAllGroupsInfo(it)
+                call.respond(HttpStatusCode.OK, groupsWithMessages)
             }
         }
     }
 }
 
 fun Route.joinGroup(groupDataSource: GroupDataSource) {
-    post("/groups/groupId={groupId}/join-group") {
+    post("groups/groupId={groupId}/join-group") {
+        call.principal<JWTPrincipal>()?.getClaim("userlogin", String::class)?.let {
 
+        }
     }
 }
 
 fun Route.subscribeToGroup(groupDataSource: GroupDataSource) {
     authenticate {
-        post("/groups/groupId={groupId}/subscribe-to-group") {
-            call.principal<JWTPrincipal>()?.getClaim("login", String::class)?.let { login ->
+        post("groups/{groupId}/subscribe-to-group") {
+            call.principal<JWTPrincipal>()?.getClaim("userlogin", String::class)?.let { login ->
                 groupDataSource.subscribeToGroup(
                     userlogin = login,
                     groupId = call.parameters["groupId"].toString()
@@ -70,8 +72,8 @@ fun Route.subscribeToGroup(groupDataSource: GroupDataSource) {
 
 fun Route.unsubscribeFromGroup(groupDataSource: GroupDataSource) {
     authenticate {
-        post("/groups/groupId={groupId}/unsubscribe-from-group") {
-            call.principal<JWTPrincipal>()?.getClaim("login", String::class)?.let { login ->
+        post("groups/groupId={groupId}/unsubscribe-from-group") {
+            call.principal<JWTPrincipal>()?.getClaim("userlogin", String::class)?.let { login ->
                 groupDataSource.unsubscribeFromGroup(
                     userlogin = login,
                     groupId = call.parameters["groupId"].toString()

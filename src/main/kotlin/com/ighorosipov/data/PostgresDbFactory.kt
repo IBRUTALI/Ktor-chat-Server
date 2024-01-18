@@ -2,6 +2,7 @@ package com.ighorosipov.data
 
 import com.ighorosipov.data.model.table.GroupTable
 import com.ighorosipov.data.model.table.MessageTable
+import com.ighorosipov.data.model.table.UserSubscriptionsTable
 import com.ighorosipov.data.model.table.UserTable
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -19,6 +20,7 @@ object PostgresDbFactory {
             SchemaUtils.create(UserTable)
             SchemaUtils.create(GroupTable)
             SchemaUtils.create(MessageTable)
+            SchemaUtils.create(UserSubscriptionsTable)
         }
     }
 
