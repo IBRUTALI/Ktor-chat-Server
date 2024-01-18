@@ -20,9 +20,9 @@ import java.util.UUID
 class PostgresGroupDataSource : GroupDataSource {
 
     private val groupTable = GroupTable
-    private val messageTable = MessageTable.alias("u1")
+    private val messageTable = MessageTable.alias("message")
     private val userSubscriptionsTable = UserSubscriptionsTable.alias("usersubscriptions")
-    private val userTable = UserTable.alias("u3")
+    private val userTable = UserTable.alias("User")
 
     override suspend fun createGroup(group: Group) {
         withContext(Dispatchers.IO) {
@@ -61,6 +61,18 @@ class PostgresGroupDataSource : GroupDataSource {
         TODO("Not yet implemented")
     }
 
+    override suspend fun getGroupById(groupId: String): Group? {
+        return withContext(Dispatchers.IO) {
+            transaction {
+                groupTable
+                    .selectAll()
+                    .where { GroupTable.id.eq(UUID.fromString(groupId)) }
+                    .map { rowToGroup(it) }
+                    .singleOrNull()
+            }
+        }
+    }
+
     override suspend fun deleteGroup(group: Group) {
         TODO("Not yet implemented")
     }
@@ -68,11 +80,17 @@ class PostgresGroupDataSource : GroupDataSource {
     override suspend fun subscribeToGroup(userlogin: String, groupId: String) {
         withContext(Dispatchers.IO) {
             transaction {
-                UserSubscriptionsTable.insert { table ->
-                    table[UserSubscriptionsTable.userlogin] = userlogin
-                    table[UserSubscriptionsTable.groupId] = UUID.fromString(groupId)
-                    table[UserSubscriptionsTable.isSubscribed] = true
+                if (UserSubscriptionsTable
+                    .selectAll()
+                    .where {
+                        UserSubscriptionsTable.userlogin.eq(userlogin) and UserSubscriptionsTable.groupId.eq(UUID.fromString(groupId))
+                    }.count() > 0) {
+                    UserSubscriptionsTable.insert { table ->
+                        table[UserSubscriptionsTable.userlogin] = userlogin
+                        table[UserSubscriptionsTable.groupId] = UUID.fromString(groupId)
+                        table[UserSubscriptionsTable.isSubscribed] = true
 
+                    }
                 }
             }
         }
@@ -141,11 +159,11 @@ class PostgresGroupDataSource : GroupDataSource {
     private fun rowToUser(row: ResultRow?): User? {
         return row?.let {
             User(
-                userlogin = row[UserTable.userlogin],
-                username = row[UserTable.username],
-                avatarUrl = row[UserTable.avatarUrl],
-                password = row[UserTable.password],
-                salt = row[UserTable.salt]
+                userlogin = row[userTable[UserTable.userlogin]],
+                username = row[userTable[UserTable.username]],
+                avatarUrl = row[userTable[UserTable.avatarUrl]],
+                password = row[userTable[UserTable.password]],
+                salt = row[userTable[UserTable.salt]]
             )
         }
     }
@@ -153,11 +171,11 @@ class PostgresGroupDataSource : GroupDataSource {
     private fun rowToMessage(row: ResultRow?): Message? {
         return row?.let {
             Message(
-                id = row[MessageTable.id].toString(),
-                groupId = row[MessageTable.groupId].toString(),
-                text = row[MessageTable.text],
-                userlogin = row[MessageTable.userlogin],
-                timestamp = row[MessageTable.timestamp]
+                id = row[messageTable[MessageTable.id]].toString(),
+                groupId = row[messageTable[MessageTable.groupId]].toString(),
+                text = row[messageTable[MessageTable.text]],
+                userlogin = row[messageTable[MessageTable.userlogin]],
+                timestamp = row[messageTable[MessageTable.timestamp]]
             )
         }
     }

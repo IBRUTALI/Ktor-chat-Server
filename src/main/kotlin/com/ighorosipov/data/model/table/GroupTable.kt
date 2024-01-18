@@ -1,7 +1,6 @@
 package com.ighorosipov.data.model.table
 
 import org.jetbrains.exposed.dao.id.UUIDTable
-import org.jetbrains.exposed.sql.Table
 
 object GroupTable: UUIDTable("group", "uuid") {
     val name = varchar("group_name", 100)

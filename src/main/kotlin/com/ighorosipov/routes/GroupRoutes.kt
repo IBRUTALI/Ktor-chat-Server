@@ -61,10 +61,16 @@ fun Route.subscribeToGroup(groupDataSource: GroupDataSource) {
     authenticate {
         post("groups/{groupId}/subscribe-to-group") {
             call.principal<JWTPrincipal>()?.getClaim("userlogin", String::class)?.let { login ->
-                groupDataSource.subscribeToGroup(
-                    userlogin = login,
-                    groupId = call.parameters["groupId"].toString()
-                )
+                val groupId = call.parameters["groupId"].toString()
+                groupDataSource.getGroupById(groupId)?.let {
+                    groupDataSource.subscribeToGroup(
+                        userlogin = login,
+                        groupId = groupId
+                    )
+                    call.respond(HttpStatusCode.OK)
+                    return@post
+                }
+                call.respond(HttpStatusCode.BadRequest, "Group not found")
             }
         }
     }
