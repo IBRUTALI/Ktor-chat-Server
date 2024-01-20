@@ -1,10 +1,7 @@
 package com.ighorosipov.data.datasource.postgresdatasource
 
 import com.ighorosipov.data.datasource.GroupDataSource
-import com.ighorosipov.data.model.Group
-import com.ighorosipov.data.model.GroupWithMessages
-import com.ighorosipov.data.model.Message
-import com.ighorosipov.data.model.User
+import com.ighorosipov.data.model.*
 import com.ighorosipov.data.model.table.GroupTable
 import com.ighorosipov.data.model.table.MessageTable
 import com.ighorosipov.data.model.table.UserSubscriptionsTable
@@ -13,7 +10,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.UUID
 
@@ -84,7 +80,7 @@ class PostgresGroupDataSource : GroupDataSource {
                     .selectAll()
                     .where {
                         UserSubscriptionsTable.userlogin.eq(userlogin) and UserSubscriptionsTable.groupId.eq(UUID.fromString(groupId))
-                    }.count() > 0) {
+                    }.count() == 0L) {
                     UserSubscriptionsTable.insert { table ->
                         table[UserSubscriptionsTable.userlogin] = userlogin
                         table[UserSubscriptionsTable.groupId] = UUID.fromString(groupId)
@@ -107,7 +103,7 @@ class PostgresGroupDataSource : GroupDataSource {
         }
     }
 
-    private fun getSubscribersByGroupId(groupId: EntityID<UUID>): List<User> {
+    private fun getSubscribersByGroupId(groupId: EntityID<UUID>): List<UserProfile> {
         return transaction {
             userTable
                 .innerJoin(
@@ -117,7 +113,7 @@ class PostgresGroupDataSource : GroupDataSource {
                 .selectAll()
                 .where { UserSubscriptionsTable.groupId.eq(groupId) }
                 .mapNotNull {
-                    rowToUser(it)
+                    rowToUserProfile(it)
                 }
         }
     }
@@ -156,14 +152,12 @@ class PostgresGroupDataSource : GroupDataSource {
         }
     }
 
-    private fun rowToUser(row: ResultRow?): User? {
+    private fun rowToUserProfile(row: ResultRow?): UserProfile? {
         return row?.let {
-            User(
+            UserProfile(
                 userlogin = row[userTable[UserTable.userlogin]],
                 username = row[userTable[UserTable.username]],
-                avatarUrl = row[userTable[UserTable.avatarUrl]],
-                password = row[userTable[UserTable.password]],
-                salt = row[userTable[UserTable.salt]]
+                avatarUrl = row[userTable[UserTable.avatarUrl]]
             )
         }
     }

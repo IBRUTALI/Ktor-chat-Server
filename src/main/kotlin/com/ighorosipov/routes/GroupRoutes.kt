@@ -50,7 +50,7 @@ fun Route.getGroups(groupDataSource: GroupDataSource) {
 }
 
 fun Route.joinGroup(groupDataSource: GroupDataSource) {
-    post("groups/groupId={groupId}/join-group") {
+    post("groupId={groupId}/join-group") {
         call.principal<JWTPrincipal>()?.getClaim("userlogin", String::class)?.let {
 
         }
@@ -59,7 +59,7 @@ fun Route.joinGroup(groupDataSource: GroupDataSource) {
 
 fun Route.subscribeToGroup(groupDataSource: GroupDataSource) {
     authenticate {
-        post("groups/{groupId}/subscribe-to-group") {
+        post("{groupId}/subscribe-to-group") {
             call.principal<JWTPrincipal>()?.getClaim("userlogin", String::class)?.let { login ->
                 val groupId = call.parameters["groupId"].toString()
                 groupDataSource.getGroupById(groupId)?.let {
@@ -78,7 +78,7 @@ fun Route.subscribeToGroup(groupDataSource: GroupDataSource) {
 
 fun Route.unsubscribeFromGroup(groupDataSource: GroupDataSource) {
     authenticate {
-        post("groups/groupId={groupId}/unsubscribe-from-group") {
+        post("groupId={groupId}/unsubscribe-from-group") {
             call.principal<JWTPrincipal>()?.getClaim("userlogin", String::class)?.let { login ->
                 groupDataSource.unsubscribeFromGroup(
                     userlogin = login,
