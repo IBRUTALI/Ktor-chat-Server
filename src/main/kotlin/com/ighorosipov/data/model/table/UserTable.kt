@@ -2,7 +2,7 @@ package com.ighorosipov.data.model.table
 
 import org.jetbrains.exposed.sql.Table
 
-object UserTable: Table() {
+object UserTable: Table("user") {
 
     val userlogin = varchar("userlogin", 512)
     val username = varchar("username", 100)

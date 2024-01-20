@@ -8,5 +8,6 @@ data class Message(
     val groupId: String,
     val text: String,
     val userlogin: String,
+    val isEdited: Boolean = false,
     val timestamp: Long,
 )

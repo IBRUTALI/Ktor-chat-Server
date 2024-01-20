@@ -1,10 +1,7 @@
 package com.ighorosipov.data.datasource.postgresdatasource
 
 import com.ighorosipov.data.datasource.MessageDataSource
-import com.ighorosipov.data.model.Group
-import com.ighorosipov.data.model.GroupWithMessages
 import com.ighorosipov.data.model.Message
-import com.ighorosipov.data.model.table.GroupTable
 import com.ighorosipov.data.model.table.GroupTable.uuid
 import com.ighorosipov.data.model.table.MessageTable
 import kotlinx.coroutines.Dispatchers
@@ -13,6 +10,8 @@ import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
+import java.util.*
 
 class PostgresMessageDataSource : MessageDataSource {
 
@@ -34,7 +33,6 @@ class PostgresMessageDataSource : MessageDataSource {
         return withContext(Dispatchers.IO) {
             transaction {
                 messageTable.insert { table ->
-                    table[id] = uuid(message.id)
                     table[groupId] = uuid(message.groupId)
                     table[text] = message.text
                     table[userlogin] = message.userlogin
@@ -48,12 +46,19 @@ class PostgresMessageDataSource : MessageDataSource {
         TODO()
     }
 
-    override suspend fun deleteMessages(selectedMessages: List<Message>) {
+    override suspend fun deleteMessages(messages: List<Message>) {
         TODO()
     }
 
     override suspend fun updateMessage(message: Message) {
-        TODO()
+        withContext(Dispatchers.IO) {
+            transaction {
+                messageTable.update({ MessageTable.id.eq(UUID.fromString(message.id)) }) { table ->
+                        table[text] = message.text
+                        table[isEdited] = true
+                    }
+            }
+        }
     }
 
     private fun rowToMessage(row: ResultRow?): Message? {

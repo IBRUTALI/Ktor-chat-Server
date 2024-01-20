@@ -10,7 +10,6 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import java.util.*
 
 fun Route.createGroup(
     groupDataSource: GroupDataSource
@@ -63,10 +62,14 @@ fun Route.subscribeToGroup(groupDataSource: GroupDataSource) {
             call.principal<JWTPrincipal>()?.getClaim("userlogin", String::class)?.let { login ->
                 val groupId = call.parameters["groupId"].toString()
                 groupDataSource.getGroupById(groupId)?.let {
-                    groupDataSource.subscribeToGroup(
+                    val wasAcknowledge = groupDataSource.subscribeToGroup(
                         userlogin = login,
                         groupId = groupId
                     )
+                    if (!wasAcknowledge) {
+                        call.respond(HttpStatusCode.Conflict, "User is already subscribed on group with groupId: $groupId")
+                        return@post
+                    }
                     call.respond(HttpStatusCode.OK)
                     return@post
                 }
@@ -78,12 +81,22 @@ fun Route.subscribeToGroup(groupDataSource: GroupDataSource) {
 
 fun Route.unsubscribeFromGroup(groupDataSource: GroupDataSource) {
     authenticate {
-        post("groupId={groupId}/unsubscribe-from-group") {
+        post("{groupId}/unsubscribe-from-group") {
             call.principal<JWTPrincipal>()?.getClaim("userlogin", String::class)?.let { login ->
-                groupDataSource.unsubscribeFromGroup(
-                    userlogin = login,
-                    groupId = call.parameters["groupId"].toString()
-                )
+                val groupId = call.parameters["groupId"].toString()
+                groupDataSource.getGroupById(groupId)?.let {
+                    val wasAcknowledge = groupDataSource.unsubscribeFromGroup(
+                        userlogin = login,
+                        groupId = groupId
+                    )
+                    if (!wasAcknowledge) {
+                        call.respond(HttpStatusCode.Conflict, "User is already unsubscribed from group with groupId: $groupId")
+                        return@post
+                    }
+                    call.respond(HttpStatusCode.OK)
+                    return@post
+                }
+                call.respond(HttpStatusCode.BadRequest, "Group not found")
             }
         }
     }

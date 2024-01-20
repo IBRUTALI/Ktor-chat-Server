@@ -2,7 +2,6 @@ package com.ighorosipov.data.datasource
 
 import com.ighorosipov.data.model.Group
 import com.ighorosipov.data.model.GroupWithMessages
-import com.ighorosipov.data.model.Message
 
 interface GroupDataSource {
 
@@ -18,8 +17,8 @@ interface GroupDataSource {
 
     suspend fun deleteGroup(group: Group)
 
-    suspend fun subscribeToGroup(userlogin: String, groupId: String)
+    suspend fun subscribeToGroup(userlogin: String, groupId: String): Boolean
 
-    suspend fun unsubscribeFromGroup(userlogin: String, groupId: String)
+    suspend fun unsubscribeFromGroup(userlogin: String, groupId: String): Boolean
 
 }

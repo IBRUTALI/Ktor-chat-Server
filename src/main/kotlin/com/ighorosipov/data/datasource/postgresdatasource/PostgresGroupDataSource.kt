@@ -1,7 +1,10 @@
 package com.ighorosipov.data.datasource.postgresdatasource
 
 import com.ighorosipov.data.datasource.GroupDataSource
-import com.ighorosipov.data.model.*
+import com.ighorosipov.data.model.Group
+import com.ighorosipov.data.model.GroupWithMessages
+import com.ighorosipov.data.model.Message
+import com.ighorosipov.data.model.UserProfile
 import com.ighorosipov.data.model.table.GroupTable
 import com.ighorosipov.data.model.table.MessageTable
 import com.ighorosipov.data.model.table.UserSubscriptionsTable
@@ -10,15 +13,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.util.UUID
+import java.util.*
 
 class PostgresGroupDataSource : GroupDataSource {
 
     private val groupTable = GroupTable
     private val messageTable = MessageTable.alias("message")
-    private val userSubscriptionsTable = UserSubscriptionsTable.alias("usersubscriptions")
-    private val userTable = UserTable.alias("User")
+    private val userSubscriptionsTable = UserSubscriptionsTable.alias("subscriptions")
+    private val userTable = UserTable.alias("user")
 
     override suspend fun createGroup(group: Group) {
         withContext(Dispatchers.IO) {
@@ -73,32 +77,47 @@ class PostgresGroupDataSource : GroupDataSource {
         TODO("Not yet implemented")
     }
 
-    override suspend fun subscribeToGroup(userlogin: String, groupId: String) {
-        withContext(Dispatchers.IO) {
+    override suspend fun subscribeToGroup(userlogin: String, groupId: String): Boolean {
+        return withContext(Dispatchers.IO) {
             transaction {
                 if (UserSubscriptionsTable
-                    .selectAll()
-                    .where {
-                        UserSubscriptionsTable.userlogin.eq(userlogin) and UserSubscriptionsTable.groupId.eq(UUID.fromString(groupId))
-                    }.count() == 0L) {
+                        .selectAll()
+                        .where {
+                            UserSubscriptionsTable.userlogin.eq(userlogin) and UserSubscriptionsTable.groupId.eq(
+                                UUID.fromString(
+                                    groupId
+                                )
+                            )
+                        }.count() == 0L
+                ) {
                     UserSubscriptionsTable.insert { table ->
                         table[UserSubscriptionsTable.userlogin] = userlogin
                         table[UserSubscriptionsTable.groupId] = UUID.fromString(groupId)
                         table[UserSubscriptionsTable.isSubscribed] = true
-
                     }
-                }
+                    return@transaction true
+                }else false
             }
         }
     }
 
-    override suspend fun unsubscribeFromGroup(userlogin: String, groupId: String) {
-        withContext(Dispatchers.IO) {
+    override suspend fun unsubscribeFromGroup(userlogin: String, groupId: String): Boolean {
+        return withContext(Dispatchers.IO) {
             transaction {
-//                userSubscriptionsTable.deleteWhere {
-//                    UserSubscriptionsTable.userlogin.eq(userlogin) and UserSubscriptionsTable.groupId.eq(UUID.fromString(groupId))
-//                }
-                TODO()
+                if (UserSubscriptionsTable
+                        .selectAll()
+                        .where {
+                            UserSubscriptionsTable.userlogin.eq(userlogin) and UserSubscriptionsTable.groupId.eq(
+                                UUID.fromString(
+                                    groupId
+                                )
+                            )
+                        }.count() == 1L
+                ) {
+                    UserSubscriptionsTable
+                        .deleteWhere { UserSubscriptionsTable.userlogin.eq(userlogin) and UserSubscriptionsTable.groupId.eq(UUID.fromString(groupId))}
+                    return@transaction true
+                } else false
             }
         }
     }
@@ -109,7 +128,8 @@ class PostgresGroupDataSource : GroupDataSource {
                 .innerJoin(
                     userSubscriptionsTable,
                     { UserTable.userlogin },
-                    { userSubscriptionsTable[UserSubscriptionsTable.userlogin] })
+                    { userSubscriptionsTable[UserSubscriptionsTable.userlogin] }
+                )
                 .selectAll()
                 .where { UserSubscriptionsTable.groupId.eq(groupId) }
                 .mapNotNull {
