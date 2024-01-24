@@ -3,6 +3,7 @@ package com.ighorosipov.routes
 import com.ighorosipov.data.datasource.GroupDataSource
 import com.ighorosipov.data.model.Group
 import com.ighorosipov.data.requests.GroupRequest
+import com.ighorosipov.session.ChatSession
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -10,6 +11,7 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.sessions.*
 
 fun Route.createGroup(
     groupDataSource: GroupDataSource
@@ -40,9 +42,13 @@ fun Route.createGroup(
 fun Route.getGroups(groupDataSource: GroupDataSource) {
     authenticate {
         get("groups") {
-            call.principal<JWTPrincipal>()?.getClaim("userlogin", String::class)?.let {
-                val groupsWithMessages = groupDataSource.getAllGroupsInfo(it)
-                call.respond(HttpStatusCode.OK, groupsWithMessages)
+            call.principal<JWTPrincipal>()?.getClaim("userlogin", String::class)?.let { login ->
+                val session = call.sessions.get<ChatSession>()
+                if (session != null) {
+                    val groupsWithMessages = groupDataSource.getAllGroupsInfo(login)
+                    call.respond(HttpStatusCode.OK, groupsWithMessages)
+                }
+
             }
         }
     }

@@ -18,9 +18,9 @@ class RoomController(
         sessionId: String,
         socket: WebSocketSession
     ) {
-//        if(members.containsKey(userlogin)) {
-//            throw MemberAlreadyExistsException()
-//        }
+        if(members.containsKey(userlogin)) {
+            throw MemberAlreadyExistsException()
+        }
         members[userlogin] = Member(
             userlogin = userlogin,
             sessionId = sessionId,

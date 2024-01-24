@@ -30,12 +30,13 @@ class PostgresMessageDataSource : MessageDataSource {
     }
 
     override suspend fun insertMessage(message: Message) {
-        return withContext(Dispatchers.IO) {
+        withContext(Dispatchers.IO) {
             transaction {
                 messageTable.insert { table ->
-                    table[groupId] = uuid(message.groupId)
+                    table[groupId] = UUID.fromString(message.groupId)
                     table[text] = message.text
                     table[userlogin] = message.userlogin
+                    table[isEdited] = message.isEdited
                     table[timestamp] = message.timestamp
                 }
             }
@@ -54,8 +55,8 @@ class PostgresMessageDataSource : MessageDataSource {
         withContext(Dispatchers.IO) {
             transaction {
                 messageTable.update({ MessageTable.id.eq(UUID.fromString(message.id)) }) { table ->
-                        table[text] = message.text
-                        table[isEdited] = true
+                        table[MessageTable.text] = message.text
+                        table[MessageTable.isEdited] = true
                     }
             }
         }

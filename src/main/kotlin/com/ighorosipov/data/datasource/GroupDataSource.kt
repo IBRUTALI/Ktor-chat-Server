@@ -9,6 +9,8 @@ interface GroupDataSource {
 
     suspend fun getAllGroupsInfo(userlogin: String): List<GroupWithMessages>
 
+    suspend fun getGroupInfo(userlogin: String): GroupWithMessages
+
     suspend fun updateGroup(group: Group)
 
     suspend fun getGroupByName(groupName: String): Group?

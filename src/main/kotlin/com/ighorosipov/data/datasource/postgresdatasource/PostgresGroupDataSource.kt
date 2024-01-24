@@ -53,6 +53,10 @@ class PostgresGroupDataSource : GroupDataSource {
         }
     }
 
+    override suspend fun getGroupInfo(userlogin: String): GroupWithMessages {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun updateGroup(group: Group) {
         TODO("Not yet implemented")
     }
