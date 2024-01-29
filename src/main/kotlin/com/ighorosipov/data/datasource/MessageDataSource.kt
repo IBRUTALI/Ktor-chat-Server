@@ -6,7 +6,7 @@ interface MessageDataSource {
 
     suspend fun getAllMessagesForGroup(groupId: String): List<Message>
 
-    suspend fun insertMessage(message: Message)
+    suspend fun insertMessage(message: Message): String?
 
     suspend fun getLastMessage(): Message?
 

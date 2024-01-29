@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Message(
-    val id: String,
+    val id: String? = null,
     val groupId: String,
     val text: String,
     val userlogin: String,

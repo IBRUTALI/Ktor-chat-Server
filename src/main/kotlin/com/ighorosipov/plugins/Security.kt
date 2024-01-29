@@ -39,7 +39,7 @@ fun Application.configureSecurity(
 
     intercept(ApplicationCallPipeline.Features) {
         if (call.sessions.get<ChatSession>() == null) {
-            val groupId = call.parameters[GROUP_ID] ?: return@intercept
+            val groupId = call.parameters[GROUP_ID]
             call.sessions.set(
                 ChatSession(
                     groupId = groupId,

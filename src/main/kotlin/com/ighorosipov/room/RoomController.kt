@@ -7,7 +7,6 @@ import com.ighorosipov.data.model.Message
 import io.ktor.websocket.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class RoomController(
@@ -32,22 +31,22 @@ class RoomController(
     }
 
    suspend fun sendMessage(senderLogin: String, message: String, groupId: String) {
-        members.values.forEach { member ->  
-            val messageEntity = Message(
-                id = UUID.randomUUID().toString(),
-                groupId = groupId,
-                text = message,
-                userlogin = senderLogin,
-                timestamp = System.currentTimeMillis()
-            )
-            if (!groupDataSource.isUserSubscribed(senderLogin, groupId)) {
-                throw Exception()
+       val messageEntity = Message(
+           groupId = groupId,
+           text = message,
+           userlogin = senderLogin,
+           timestamp = System.currentTimeMillis()
+       )
+       if (!groupDataSource.isUserSubscribed(senderLogin, groupId)) {
+           throw Exception()
+       }
+       val uuidMessage = messageDataSource.insertMessage(messageEntity)
+
+        members.values.forEach { member ->
+            if (groupDataSource.isUserSubscribed(member.userlogin, groupId)) {
+                val parsedMessage = Json.encodeToString(messageEntity.copy(id = uuidMessage))
+                member.socket.send(Frame.Text(parsedMessage))
             }
-
-            messageDataSource.insertMessage(messageEntity)
-
-            val parsedMessage = Json.encodeToString(messageEntity)
-            member.socket.send(Frame.Text(parsedMessage))
         }
     }
 

@@ -33,8 +33,10 @@ fun Route.chatSocket(roomController: RoomController) {
                     sessionId = session.sessionId,
                     socket = this
                 )
+
                 incoming.consumeEach { frame ->
                     if (frame is Frame.Text) {
+                        if (session.groupId != null)
                         roomController.sendMessage(
                             senderLogin = login,
                             groupId = session.groupId,
@@ -43,7 +45,7 @@ fun Route.chatSocket(roomController: RoomController) {
                     }
                 }
             } catch (e: MemberAlreadyExistsException) {
-                call.respond(HttpStatusCode.Conflict)
+                call.respond(HttpStatusCode.Conflict, e)
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {

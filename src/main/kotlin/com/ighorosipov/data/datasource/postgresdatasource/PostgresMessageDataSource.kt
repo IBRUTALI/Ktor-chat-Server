@@ -29,8 +29,8 @@ class PostgresMessageDataSource : MessageDataSource {
         }
     }
 
-    override suspend fun insertMessage(message: Message) {
-        withContext(Dispatchers.IO) {
+    override suspend fun insertMessage(message: Message): String? {
+        return withContext(Dispatchers.IO) {
             transaction {
                 messageTable.insert { table ->
                     table[groupId] = UUID.fromString(message.groupId)
@@ -38,7 +38,7 @@ class PostgresMessageDataSource : MessageDataSource {
                     table[userlogin] = message.userlogin
                     table[isEdited] = message.isEdited
                     table[timestamp] = message.timestamp
-                }
+                }.resultedValues?.first()?.get(MessageTable.id).toString()
             }
         }
     }
