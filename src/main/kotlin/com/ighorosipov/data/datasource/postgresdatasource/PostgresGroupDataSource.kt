@@ -53,6 +53,19 @@ class PostgresGroupDataSource : GroupDataSource {
         }
     }
 
+    override suspend fun isUserSubscribed(userlogin: String, groupId: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            transaction {
+                return@transaction userSubscriptionsTable
+                    .selectAll()
+                    .where {
+                        UserSubscriptionsTable.userlogin.eq(userlogin) and
+                                UserSubscriptionsTable.groupId.eq(UUID.fromString(groupId))
+                    }.count() > 0
+            }
+        }
+    }
+
     override suspend fun getGroupInfo(userlogin: String): GroupWithMessages {
         TODO("Not yet implemented")
     }
@@ -100,7 +113,7 @@ class PostgresGroupDataSource : GroupDataSource {
                         table[UserSubscriptionsTable.isSubscribed] = true
                     }
                     return@transaction true
-                }else false
+                } else false
             }
         }
     }
@@ -119,7 +132,11 @@ class PostgresGroupDataSource : GroupDataSource {
                         }.count() == 1L
                 ) {
                     UserSubscriptionsTable
-                        .deleteWhere { UserSubscriptionsTable.userlogin.eq(userlogin) and UserSubscriptionsTable.groupId.eq(UUID.fromString(groupId))}
+                        .deleteWhere {
+                            UserSubscriptionsTable.userlogin.eq(userlogin) and UserSubscriptionsTable.groupId.eq(
+                                UUID.fromString(groupId)
+                            )
+                        }
                     return@transaction true
                 } else false
             }

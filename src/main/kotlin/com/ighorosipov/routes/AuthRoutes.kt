@@ -17,6 +17,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
+const val USERLOGIN = "userlogin"
 fun Route.signUp(
     hashingService: HashingService,
     userDataSource: UserDataSource
@@ -83,7 +84,7 @@ fun Route.signIn(
         val token = tokenService.generate(
             config = tokenConfig,
             TokenClaim(
-                name = "userlogin",
+                name = USERLOGIN,
                 value = user.userlogin
             )
         )
@@ -109,7 +110,7 @@ fun Route.getSecretInfo() {
     authenticate {
         get("secret") {
             val principal = call.principal<JWTPrincipal>()
-            val userlogin = principal?.getClaim("userlogin", String::class)
+            val userlogin = principal?.getClaim(USERLOGIN, String::class)
             call.respond(HttpStatusCode.OK, "Your login is $userlogin")
         }
     }

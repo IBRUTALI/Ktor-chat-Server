@@ -23,7 +23,7 @@ fun Application.configureRouting(
     val roomController by inject<RoomController>()
     install(Routing) {
         chatSocket(roomController)
-        getAllMessages(roomController)
+        getAllGroupsInfo(roomController)
         signUp(
             hashingService = hashingService,
             userDataSource = userDataSource
@@ -37,8 +37,6 @@ fun Application.configureRouting(
         authenticate()
         getSecretInfo()
         createGroup(groupDataSource)
-        getGroups(groupDataSource)
-        joinGroup(groupDataSource)
         subscribeToGroup(groupDataSource)
         unsubscribeFromGroup(groupDataSource)
     }

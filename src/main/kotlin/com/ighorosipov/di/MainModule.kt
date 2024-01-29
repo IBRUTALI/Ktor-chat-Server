@@ -2,14 +2,9 @@ package com.ighorosipov.di
 
 import com.ighorosipov.data.datasource.GroupDataSource
 import com.ighorosipov.data.datasource.MessageDataSource
-import com.ighorosipov.data.datasource.postgresdatasource.PostgresUserDataSource
-import com.ighorosipov.data.datasource.UserDataSource
 import com.ighorosipov.data.datasource.postgresdatasource.PostgresGroupDataSource
 import com.ighorosipov.data.datasource.postgresdatasource.PostgresMessageDataSource
 import com.ighorosipov.room.RoomController
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
-import org.jetbrains.exposed.sql.Database
 import org.koin.dsl.module
 
 val mainModule = module {
@@ -44,12 +39,12 @@ val mainModule = module {
 //        PostgresUserDataSource(get())
 //    }
 //
-//    single<GroupDataSource> {
-//        PostgresGroupDataSource(get())
-//    }
+    single<GroupDataSource> {
+        PostgresGroupDataSource()
+    }
 
     single {
-        RoomController(get())
+        RoomController(get(), get())
     }
 
 }

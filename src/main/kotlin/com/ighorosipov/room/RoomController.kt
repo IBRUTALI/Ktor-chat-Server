@@ -1,6 +1,8 @@
 package com.ighorosipov.room
 
+import com.ighorosipov.data.datasource.GroupDataSource
 import com.ighorosipov.data.datasource.MessageDataSource
+import com.ighorosipov.data.model.GroupWithMessages
 import com.ighorosipov.data.model.Message
 import io.ktor.websocket.*
 import kotlinx.serialization.encodeToString
@@ -9,7 +11,8 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class RoomController(
-    private val messageDataSource: MessageDataSource
+    private val messageDataSource: MessageDataSource,
+    private val groupDataSource: GroupDataSource
 ) {
     private val members = ConcurrentHashMap<String, Member>()
 
@@ -37,6 +40,10 @@ class RoomController(
                 userlogin = senderLogin,
                 timestamp = System.currentTimeMillis()
             )
+            if (!groupDataSource.isUserSubscribed(senderLogin, groupId)) {
+                throw Exception()
+            }
+
             messageDataSource.insertMessage(messageEntity)
 
             val parsedMessage = Json.encodeToString(messageEntity)
@@ -44,8 +51,8 @@ class RoomController(
         }
     }
 
-    suspend fun getAllMessages(groupId: String): List<Message> {
-        return messageDataSource.getAllMessagesForGroup(groupId)
+    suspend fun getAllGroupsInfo(userlogin: String): List<GroupWithMessages> {
+        return groupDataSource.getAllGroupsInfo(userlogin)
     }
 
     suspend fun tryDisconnect(userlogin: String) {
